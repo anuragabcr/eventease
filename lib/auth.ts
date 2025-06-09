@@ -40,8 +40,12 @@ export const authOptions = {
   },
   callbacks: {
     async session({ session, token }: { session: Session; token: JWT }) {
+      const user = await prisma.user.findUnique({
+        where: { email: session.user?.email || "" },
+      });
       if (session.user && token?.sub) {
         (session.user as { id: string }).id = token.sub;
+        (session.user as { role: string }).role = user?.role || "";
       }
       return session;
     },
