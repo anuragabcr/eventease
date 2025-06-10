@@ -4,6 +4,12 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+export async function GET() {
+  const event = await prisma.event.findMany();
+
+  return new Response(JSON.stringify(event), { status: 200 });
+}
+
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
 
