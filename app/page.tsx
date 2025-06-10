@@ -1,5 +1,11 @@
 import EventList from "@/components/shared/EventList";
+import HeroSection from "@/components/shared/HeroSection";
 
 export default function Home() {
-  return <EventList />;
+  return (
+    <>
+      <HeroSection />
+      <EventList />
+    </>
+  );
 }

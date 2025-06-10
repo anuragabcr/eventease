@@ -6,7 +6,6 @@ import LogoutButton from "./Logout";
 
 export default async function Navbar() {
   const session: Session | null = await getServerSession(authOptions);
-  console.log(session);
 
   return (
     <>
@@ -26,6 +25,14 @@ export default async function Navbar() {
               />
             </Link>
           </div>
+          {session && session.user && (
+            <Link
+              href="/dashboard"
+              className="mx-1 text-sm/6 font-semibold text-gray-900 bg-cyan-300 p-3 rounded-2xl hover:bg-cyan-400 transition-colors"
+            >
+              Dashboard <span aria-hidden="true"></span>
+            </Link>
+          )}
 
           <div className="lg:flex lg:flex-1 lg:justify-end items-center">
             {session && session.user ? (

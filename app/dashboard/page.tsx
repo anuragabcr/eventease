@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { PrismaClient } from "@prisma/client";
 import Link from "next/link";
+import EventActions from "@/components/shared/EventActions";
 
 const prisma = new PrismaClient();
 
@@ -34,16 +35,19 @@ export default async function DashboardPage() {
       ) : (
         <ul className="space-y-4">
           {events.map((event) => (
-            <li key={event.id} className="border p-4 rounded shadow-sm">
-              <h2 className="font-semibold">{event.title}</h2>
-              <p>
-                {event.location} • {new Date(event.date).toLocaleString()}
-              </p>
-              <p className="text-sm text-gray-500">{event.description}</p>
-              {/* Placeholder for Edit/Delete */}
+            <li
+              key={event.id}
+              className="flex justify-between border p-4 rounded shadow-sm"
+            >
+              <div>
+                <h2 className="font-semibold">{event.title}</h2>
+                <p>
+                  {event.location} • {new Date(event.date).toLocaleString()}
+                </p>
+                <p className="text-sm text-gray-500">{event.description}</p>
+              </div>
               <div className="mt-2 space-x-2">
-                <button className="text-blue-500">Edit</button>
-                <button className="text-red-500">Delete</button>
+                <EventActions eventId={event.id} eventName={event.title} />
               </div>
             </li>
           ))}

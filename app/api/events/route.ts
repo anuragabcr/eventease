@@ -5,9 +5,21 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export async function GET() {
-  const event = await prisma.event.findMany();
+  const events = await prisma.event.findMany({
+    include: {
+      owner: {
+        select: {
+          name: true,
+          email: true,
+        },
+      },
+    },
+    orderBy: {
+      date: "asc",
+    },
+  });
 
-  return new Response(JSON.stringify(event), { status: 200 });
+  return new Response(JSON.stringify(events), { status: 200 });
 }
 
 export async function POST(req: Request) {
