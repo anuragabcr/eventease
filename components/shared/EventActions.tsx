@@ -7,11 +7,13 @@ import Link from "next/link";
 interface EventActionsProps {
   eventId: string;
   eventName: string;
+  onEventDeleted: () => void;
 }
 
 export default function EventActions({
   eventId,
   eventName,
+  onEventDeleted,
 }: EventActionsProps) {
   const router = useRouter();
 
@@ -38,6 +40,7 @@ export default function EventActions({
         toast.success(`Event "${eventName}" deleted successfully!`, {
           id: deleteToastId,
         });
+        onEventDeleted();
         router.refresh();
       } else {
         const errorData = await response.json();

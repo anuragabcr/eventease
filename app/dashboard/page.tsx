@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import EventActions from "@/components/shared/EventActions";
 import { Calendar, MapPin, PlusCircle, Users } from "lucide-react";
@@ -12,23 +12,24 @@ export default function DashboardPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function fetchEvents() {
-      try {
-        const res = await fetch("/api/events/user");
-        if (!res.ok) throw new Error("Failed to fetch events");
-        const data = await res.json();
-        setEvents(data);
-      } catch (err) {
-        toast.error("Failed to load events.");
-        console.log(err);
-      } finally {
-        setLoading(false);
-      }
+  const fetchEvents = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/events/user");
+      if (!res.ok) throw new Error("Failed to fetch events");
+      const data = await res.json();
+      setEvents(data);
+    } catch (err) {
+      toast.error("Failed to load events.");
+      console.log(err);
+    } finally {
+      setLoading(false);
     }
-
-    fetchEvents();
   }, []);
+
+  useEffect(() => {
+    fetchEvents();
+  }, [fetchEvents]);
 
   if (loading) {
     return (
@@ -38,10 +39,10 @@ export default function DashboardPage() {
     );
   }
 
-  if (events.length === 0) {
+  if (events.length === 0 && !loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-100 p-6">
-        <EmptyState description="No events recorded." />
+        <EmptyState description="No events found. Create your first event!" />
       </div>
     );
   }
@@ -71,7 +72,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {events.length === 0 ? (
+        {events.length === 0 && !loading ? (
           <div className="text-center py-12 text-gray-600 text-xl">
             <p className="mb-4">You haven&apos;t created any events yet.</p>
             <p className="mb-6">
@@ -111,8 +112,11 @@ export default function DashboardPage() {
                   </p>
                 </div>
                 <div className="mt-4 flex justify-end">
-                  {" "}
-                  <EventActions eventId={event.id} eventName={event.title} />
+                  <EventActions
+                    eventId={event.id}
+                    eventName={event.title}
+                    onEventDeleted={fetchEvents}
+                  />
                 </div>
               </li>
             ))}
