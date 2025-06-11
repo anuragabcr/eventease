@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { Mail, Lock, LogIn } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -12,6 +13,8 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const loginToastId = toast.loading("Signing in...");
     const result = await signIn("credentials", {
       email,
       password,
@@ -20,101 +23,104 @@ export default function LoginPage() {
 
     if (result?.error) {
       console.error("Login error:", result.error);
-      toast.error("Try again, Failed to login");
+      toast.error(
+        `Login failed: ${result.error || "Please check your credentials."}`,
+        { id: loginToastId }
+      );
     } else if (result?.ok) {
-      toast.success("Login Successful");
+      toast.success("Login successful! Redirecting...", { id: loginToastId });
       router.push("/dashboard");
       router.refresh();
     }
   };
 
   return (
-    <section className="bg-gray-50 dark:bg-gray-900">
-      <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
-        <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
-          <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
-            <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
-              Sign in to your account
-            </h1>
-            <form className="space-y-4 md:space-y-6" onSubmit={handleLogin}>
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                >
-                  Your email
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  id="email"
-                  className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  placeholder="name@company.com"
-                  required
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="password"
-                  className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                >
-                  Password
-                </label>
-                <input
-                  type="password"
-                  id="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  required
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-start">
-                  <div className="flex items-center h-5">
-                    <input
-                      id="remember"
-                      aria-describedby="remember"
-                      type="checkbox"
-                      className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-primary-600 dark:ring-offset-gray-800"
-                    />
-                  </div>
-                  <div className="ml-3 text-sm">
-                    <label
-                      htmlFor="remember"
-                      className="text-gray-500 dark:text-gray-300"
-                    >
-                      Remember me
-                    </label>
-                  </div>
-                </div>
-                <a
-                  href="#"
-                  className="text-sm font-medium text-blue-600 hover:underline dark:text-blue-500"
-                >
-                  Forgot password?
-                </a>
-              </div>
-              <button
-                type="submit"
-                className="w-full text-white bg-sky-400 hover:bg-sky-500 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-sky-500 dark:focus:ring-primary-800 cursor-pointer"
-              >
-                Sign in
-              </button>
-              <p className="text-sm font-light text-gray-500 dark:text-gray-400">
-                Don’t have an account yet?{" "}
-                <Link
-                  href="/signup"
-                  className="font-medium text-blue-600 hover:underline dark:text-blue-500"
-                >
-                  Sign up
-                </Link>
-              </p>
-            </form>
+    <section className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center p-4 sm:p-6 lg:p-8">
+      <div className="max-w-md w-full bg-white shadow-2xl rounded-2xl p-8 lg:p-10 animate-fadeIn">
+        <h1 className="text-4xl font-extrabold text-gray-900 mb-4 text-center">
+          Sign in to your account
+        </h1>
+        <p className="text-center text-lg text-gray-600 mb-8">
+          Welcome back! Please enter your credentials to continue.
+        </p>
+
+        <form className="space-y-6" onSubmit={handleLogin}>
+          <div>
+            <label
+              htmlFor="email"
+              className=" text-md font-semibold text-gray-700 mb-2 flex items-center"
+            >
+              <Mail className="w-5 h-5 mr-2 text-blue-500" /> Your email
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              id="email"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-colors placeholder-gray-400 text-gray-900"
+              placeholder="name@company.com"
+              required
+            />
           </div>
-        </div>
+
+          <div>
+            <label
+              htmlFor="password"
+              className=" text-md font-semibold text-gray-700 mb-2 flex items-center"
+            >
+              <Lock className="w-5 h-5 mr-2 text-blue-500" /> Password
+            </label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-colors placeholder-gray-400 text-gray-900"
+              required
+            />
+          </div>
+
+          <div className="flex items-center justify-between mt-4">
+            <div className="flex items-center">
+              <input
+                id="remember"
+                aria-describedby="remember"
+                type="checkbox"
+                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 transition-colors cursor-pointer"
+              />
+              <label
+                htmlFor="remember"
+                className="ml-2 text-sm text-gray-600 cursor-pointer"
+              >
+                Remember me
+              </label>
+            </div>
+            <Link
+              href="/forgot-password"
+              className="text-sm font-medium text-blue-600 hover:underline hover:text-blue-700 transition-colors"
+            >
+              Forgot password?
+            </Link>
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold text-lg hover:bg-blue-700 transition-all duration-300 ease-in-out shadow-lg transform hover:scale-105 inline-flex items-center justify-center"
+          >
+            <LogIn className="w-5 h-5 mr-2" /> Sign in
+          </button>
+
+          <p className="text-center text-sm font-light text-gray-500 mt-6">
+            Don’t have an account yet?{" "}
+            <Link
+              href="/signup"
+              className="font-medium text-blue-600 hover:underline hover:text-blue-700 transition-colors"
+            >
+              Sign up
+            </Link>
+          </p>
+        </form>
       </div>
     </section>
   );

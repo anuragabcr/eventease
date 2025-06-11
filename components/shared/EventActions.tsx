@@ -62,7 +62,7 @@ export default function EventActions({
   return (
     <div className="mt-2 space-x-4">
       <Link
-        href={`/dashboard/edit-event/${eventId}`}
+        href={`/dashboard/event-details/${eventId}`}
         className="text-blue-500 cursor-pointer px-3 py-1 border border-blue-500 rounded-md transition-colors duration-200 hover:bg-blue-50 hover:text-blue-600 text-2xl "
         aria-label={`Edit event ${eventName}`}
       >

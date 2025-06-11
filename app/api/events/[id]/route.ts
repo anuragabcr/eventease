@@ -92,6 +92,34 @@ export async function PUT(
   }
 }
 
+export async function PATCH(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  const body = await req.json();
+  const session: Session | null = await getServerSession(authOptions);
+
+  if (!session || !session.user || session.user.role !== "EVENT_OWNER") {
+    return NextResponse.json(
+      { message: "Unauthorized or Forbidden" },
+      { status: 403 }
+    );
+  }
+
+  const event = await prisma.event.update({
+    where: { id },
+    data: {
+      title: body.title,
+      date: new Date(body.date),
+      location: body.location,
+      description: body.description,
+    },
+  });
+
+  return new Response(JSON.stringify(event), { status: 200 });
+}
+
 export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }

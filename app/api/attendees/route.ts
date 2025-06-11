@@ -4,27 +4,33 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-export async function GET(req: Request) {
+export async function GET() {
   const session = await getServerSession(authOptions);
-  const { searchParams } = new URL(req.url);
-  const eventId = searchParams.get("eventId");
 
   if (!session || session.user.role !== "EVENT_OWNER") {
     return new Response("Unauthorized", { status: 403 });
   }
 
-  if (!eventId) return new Response("Missing Event ID", { status: 400 });
-
-  // Ensure the event belongs to the logged-in user
-  const event = await prisma.event.findFirst({
-    where: { id: eventId, ownerId: session.user.id },
+  const events = await prisma.event.findMany({
+    where: { ownerId: session.user.id },
+    select: { id: true },
   });
 
-  if (!event)
-    return new Response("Event not found or unauthorized", { status: 404 });
+  if (events.length === 0) {
+    return new Response(JSON.stringify([]), { status: 200 });
+  }
+
+  const eventIds = events.map((e) => e.id);
 
   const rsvps = await prisma.rSVP.findMany({
-    where: { eventId },
+    where: {
+      eventId: { in: eventIds },
+    },
+    include: {
+      event: {
+        select: { title: true, date: true },
+      },
+    },
     orderBy: { createdAt: "desc" },
   });
 

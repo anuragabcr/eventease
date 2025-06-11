@@ -1,20 +1,27 @@
 "use client";
+
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { LogOut } from "lucide-react";
 
 export default function LogoutButton() {
   const router = useRouter();
 
+  const buttonLinkStyle =
+    "inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 shadow-sm whitespace-nowrap";
+
   const handleLogout = async () => {
-    console.log("logout");
+    console.log("logout initiated");
 
     try {
       const result = await signOut({ redirect: false });
-      console.log(result);
+      console.log("signOut result:", result);
 
       if (result?.url) {
-        toast.success("Logged out successfully!");
+        toast.success("Logged out successfully!", {
+          position: "bottom-center",
+        });
         router.push("/");
         router.refresh();
       } else {
@@ -30,10 +37,10 @@ export default function LogoutButton() {
   return (
     <button
       onClick={handleLogout}
-      className="mx-1 text-sm/6 font-semibold text-gray-900 bg-red-300 p-3 rounded-2xl hover:bg-red-400 transition-colors cursor-pointer"
+      className={`${buttonLinkStyle} bg-red-500 text-white hover:bg-red-600 cursor-pointer`}
       aria-label="Log out"
     >
-      Log out
+      <LogOut className="w-4 h-4 mr-2" /> Log out{" "}
     </button>
   );
 }

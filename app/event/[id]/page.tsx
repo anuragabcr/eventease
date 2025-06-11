@@ -7,14 +7,7 @@ import toast from "react-hot-toast";
 import LoadingSpinner from "@/components/shared/LoadingSpinner";
 import { Calendar, MapPin, CheckCircle } from "lucide-react";
 import Link from "next/link";
-
-interface EventData {
-  id: string;
-  title: string;
-  location: string;
-  description: string;
-  date: string;
-}
+import { EventData } from "@/types/event";
 
 export default function PublicEventPage() {
   const { id } = useParams();
