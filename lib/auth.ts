@@ -2,7 +2,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
-import { Session, SessionStrategy } from "next-auth";
+import { Session, SessionStrategy, User } from "next-auth";
 import { JWT } from "next-auth/jwt";
 
 const prisma = new PrismaClient();
@@ -39,6 +39,14 @@ export const authOptions = {
     signIn: "/login",
   },
   callbacks: {
+    async jwt({ token, user }: { token: JWT; user?: User }) {
+      if (user) {
+        token.id = user.id;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        token.role = (user as any).role;
+      }
+      return token;
+    },
     async session({ session, token }: { session: Session; token: JWT }) {
       const user = await prisma.user.findUnique({
         where: { email: session.user?.email || "" },

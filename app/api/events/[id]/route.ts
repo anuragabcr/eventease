@@ -38,7 +38,7 @@ export async function PUT(
   const { id: eventId } = await params;
   const session: Session | null = await getServerSession(authOptions);
 
-  if (!session || !session.user || session.user.role !== "EVENT_OWNER") {
+  if (!session || !session.user || !session.user.role) {
     return NextResponse.json(
       { message: "Unauthorized or Forbidden" },
       { status: 403 }
@@ -58,18 +58,10 @@ export async function PUT(
   try {
     const existingEvent = await prisma.event.findUnique({
       where: { id: eventId },
-      select: { ownerId: true },
     });
 
     if (!existingEvent) {
       return NextResponse.json({ message: "Event not found" }, { status: 404 });
-    }
-
-    if (existingEvent.ownerId !== session.user.id) {
-      return NextResponse.json(
-        { message: "Forbidden: You do not own this event" },
-        { status: 403 }
-      );
     }
 
     const updatedEvent = await prisma.event.update({
@@ -100,7 +92,7 @@ export async function PATCH(
   const body = await req.json();
   const session: Session | null = await getServerSession(authOptions);
 
-  if (!session || !session.user || session.user.role !== "EVENT_OWNER") {
+  if (!session || !session.user || !session.user.role) {
     return NextResponse.json(
       { message: "Unauthorized or Forbidden" },
       { status: 403 }
@@ -127,7 +119,7 @@ export async function DELETE(
   const { id: eventId } = await params;
   const session: Session | null = await getServerSession(authOptions);
 
-  if (!session || !session.user || session.user.role !== "EVENT_OWNER") {
+  if (!session || !session.user || !session.user.role) {
     return NextResponse.json(
       { message: "Unauthorized or Forbidden" },
       { status: 403 }
@@ -137,19 +129,25 @@ export async function DELETE(
   try {
     const existingEvent = await prisma.event.findUnique({
       where: { id: eventId },
-      select: { ownerId: true },
     });
 
     if (!existingEvent) {
       return NextResponse.json({ message: "Event not found" }, { status: 404 });
     }
 
-    if (existingEvent.ownerId !== session.user.id) {
+    if (
+      existingEvent.ownerId !== session.user.id &&
+      session.user.role !== "ADMIN"
+    ) {
       return NextResponse.json(
         { message: "Forbidden: You do not own this event" },
         { status: 403 }
       );
     }
+
+    await prisma.rSVP.deleteMany({
+      where: { eventId },
+    });
 
     await prisma.event.delete({
       where: { id: eventId },

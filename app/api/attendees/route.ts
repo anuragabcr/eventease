@@ -7,12 +7,15 @@ const prisma = new PrismaClient();
 export async function GET() {
   const session = await getServerSession(authOptions);
 
-  if (!session || session.user.role !== "EVENT_OWNER") {
+  if (!session || !session.user.role) {
     return new Response("Unauthorized", { status: 403 });
   }
 
+  const whereClause =
+    session.user.role !== "EVENT_OWNER" ? {} : { ownerId: session.user.id };
+
   const events = await prisma.event.findMany({
-    where: { ownerId: session.user.id },
+    where: whereClause,
     select: { id: true },
   });
 
@@ -28,11 +31,24 @@ export async function GET() {
     },
     include: {
       event: {
-        select: { title: true, date: true },
+        select: {
+          title: true,
+          date: true,
+          owner: {
+            select: {
+              name: true,
+              email: true,
+              role: true,
+            },
+          },
+        },
       },
     },
     orderBy: { createdAt: "desc" },
   });
 
-  return new Response(JSON.stringify(rsvps), { status: 200 });
+  return new Response(JSON.stringify(rsvps), {
+    status: 200,
+    headers: { "Content-Type": "application/json" },
+  });
 }

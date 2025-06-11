@@ -1,4 +1,6 @@
+import { authOptions } from "@/lib/auth";
 import { PrismaClient } from "@prisma/client";
+import { getServerSession } from "next-auth";
 import { NextRequest } from "next/server";
 
 const prisma = new PrismaClient();
@@ -9,6 +11,15 @@ export async function GET(
 ) {
   try {
     const { id: eventId } = await params;
+
+    const session = await getServerSession(authOptions);
+
+    if (!session || !session.user.role) {
+      return new Response("Unauthorized", { status: 403 });
+    }
+
+    // const whereClause =
+    //   session.user.role !== "EVENT_OWNER" ? {} : { ownerId: session.user.id };
 
     const rsvps = await prisma.rSVP.findMany({
       where: { eventId },

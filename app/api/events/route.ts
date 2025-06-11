@@ -25,7 +25,7 @@ export async function GET() {
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
 
-  if (!session || session.user.role !== "EVENT_OWNER") {
+  if (!session || !session.user.role) {
     return new Response("Unauthorized", { status: 403 });
   }
 

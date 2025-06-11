@@ -12,11 +12,8 @@ export default function LogoutButton() {
     "inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 shadow-sm whitespace-nowrap";
 
   const handleLogout = async () => {
-    console.log("logout initiated");
-
     try {
       const result = await signOut({ redirect: false });
-      console.log("signOut result:", result);
 
       if (result?.url) {
         toast.success("Logged out successfully!", {

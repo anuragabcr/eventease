@@ -26,3 +26,16 @@ export interface RSVP {
   email: string;
   createdAt: string;
 }
+
+export type AttendeeData = {
+  id: string;
+  name: string;
+  email: string;
+  createdAt: string;
+  event: {
+    title: string;
+    owner: {
+      name: string;
+    };
+  };
+};

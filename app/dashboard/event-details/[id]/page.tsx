@@ -4,8 +4,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { EventData, RSVP } from "@/types/event"; // Ensure these types are correctly defined
-import LoadingSpinner from "@/components/shared/LoadingSpinner"; // Assuming this component exists
+import { EventData, RSVP } from "@/types/event";
+import LoadingSpinner from "@/components/shared/LoadingSpinner";
 import {
   Pencil,
   Save,
@@ -13,18 +13,17 @@ import {
   Calendar,
   MapPin,
   BookOpen,
-  Ban,
   User,
   Mail,
   Clock,
-  ExternalLink, // Added for external link icon if needed
+  ExternalLink,
 } from "lucide-react";
 
 export default function EventDetails() {
   const { id } = useParams();
   const router = useRouter();
   const [event, setEvent] = useState<EventData | null>(null);
-  const [rsvps, setRsvps] = useState<RSVP[]>([]); // State to hold RSVP list
+  const [rsvps, setRsvps] = useState<RSVP[]>([]);
   const [editMode, setEditMode] = useState(false);
   const [form, setForm] = useState({
     title: "",
@@ -32,8 +31,7 @@ export default function EventDetails() {
     location: "",
     description: "",
   });
-  const [isLoading, setIsLoading] = useState(true); // Track initial loading state for both event and RSVPs
-  const [accessDenied, setAccessDenied] = useState(false); // Track access denied state
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
@@ -41,10 +39,8 @@ export default function EventDetails() {
 
       setIsLoading(true);
       try {
-        // Fetch Event Details
         const eventRes = await fetch(`/api/events/${id}`);
         if (eventRes.status === 403) {
-          setAccessDenied(true);
           toast.error(
             "Access denied. You do not have permission to view/edit this event."
           );
@@ -63,8 +59,7 @@ export default function EventDetails() {
           description: eventData.description || "",
         });
 
-        // Fetch RSVPs
-        const rsvpsRes = await fetch(`/api/attendees/${id}`); // Assuming this is your API for RSVPs for a given event ID
+        const rsvpsRes = await fetch(`/api/attendees/${id}`);
         if (!rsvpsRes.ok) {
           throw new Error(`Failed to fetch RSVP list: ${rsvpsRes.statusText}`);
         }
@@ -75,8 +70,8 @@ export default function EventDetails() {
           `Error loading data: ${error.message || "An unknown error occurred"}`
         );
         console.error("Failed to fetch event or RSVPs:", error);
-        setEvent(null); // Clear event on error
-        setRsvps([]); // Clear RSVPs on error
+        setEvent(null);
+        setRsvps([]);
       } finally {
         setIsLoading(false);
       }
@@ -94,7 +89,6 @@ export default function EventDetails() {
   const handleSave = async () => {
     const saveToastId = toast.loading("Saving changes...");
     try {
-      // Using PUT method as per previous API route definition for update
       const res = await fetch(`/api/events/${id}`, {
         method: "PUT",
         headers: {
@@ -107,8 +101,7 @@ export default function EventDetails() {
         toast.success("Event updated successfully!", { id: saveToastId });
         setEditMode(false);
         const updatedEventData = await res.json();
-        setEvent(updatedEventData); // Update the local event state with new data
-        // No need for router.refresh() here if you're updating state directly
+        setEvent(updatedEventData);
       } else {
         const errorData = await res.json();
         toast.error(`Update failed: ${errorData.message || res.statusText}`, {
@@ -127,7 +120,6 @@ export default function EventDetails() {
 
   const handleCancelEdit = () => {
     setEditMode(false);
-    // Reset form to original event data if available
     if (event) {
       setForm({
         title: event.title,
@@ -138,7 +130,6 @@ export default function EventDetails() {
     }
   };
 
-  // Render loading state
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -147,31 +138,6 @@ export default function EventDetails() {
     );
   }
 
-  // Render access denied state
-  if (accessDenied) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-red-50 p-6 text-center">
-        <div className="bg-white p-10 rounded-xl shadow-2xl max-w-md w-full">
-          <Ban className="w-20 h-20 text-red-500 mx-auto mb-6" />
-          <h1 className="text-3xl font-bold text-red-700 mb-4">
-            Access Denied!
-          </h1>
-          <p className="text-gray-700 text-lg">
-            You do not have permission to view or edit this event. Please ensure
-            you are logged in as the event owner.
-          </p>
-          <button
-            onClick={() => router.push("/dashboard")}
-            className="mt-6 bg-blue-600 text-white py-2 px-5 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-          >
-            Go to Dashboard
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // Render if event is null after loading (e.g., 404 from API)
   if (!event) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50 p-6 text-center">
@@ -195,7 +161,6 @@ export default function EventDetails() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 items-center p-4 sm:p-6 lg:p-8">
-      {/* Event Details Section */}
       <div className="max-w-4xl w-full bg-white shadow-2xl rounded-2xl p-8 lg:p-10 space-y-8 animate-fadeIn mb-8">
         <div className="flex justify-between items-center border-b pb-6 mb-6">
           <h1 className="text-4xl font-extrabold text-gray-900">
@@ -309,7 +274,7 @@ export default function EventDetails() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center text-blue-600 hover:underline text-lg"
               >
-                {`${window.location.origin}/events/${id}`}
+                {`${window.location.origin}/event/${id}`}
                 <ExternalLink className="w-5 h-5 ml-2" />
               </a>
               <p className="text-sm text-gray-500 mt-1">

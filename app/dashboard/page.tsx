@@ -1,43 +1,50 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { PrismaClient } from "@prisma/client";
+"use client";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Session } from "next-auth";
 import EventActions from "@/components/shared/EventActions";
-import { Calendar, MapPin, PlusCircle, Ban, Users } from "lucide-react";
+import { Calendar, MapPin, PlusCircle, Users } from "lucide-react";
+import { Event } from "@/types/event";
+import toast from "react-hot-toast";
+import LoadingSpinner from "@/components/shared/LoadingSpinner";
+import EmptyState from "@/components/shared/EmptyState";
 
-const prisma = new PrismaClient();
+export default function DashboardPage() {
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
 
-export default async function DashboardPage() {
-  const session: Session | null = await getServerSession(authOptions);
+  useEffect(() => {
+    async function fetchEvents() {
+      try {
+        const res = await fetch("/api/events/user");
+        if (!res.ok) throw new Error("Failed to fetch events");
+        const data = await res.json();
+        setEvents(data);
+      } catch (err) {
+        toast.error("Failed to load events.");
+        console.log(err);
+      } finally {
+        setLoading(false);
+      }
+    }
 
-  if (!session || !session.user || session.user.role !== "EVENT_OWNER") {
+    fetchEvents();
+  }, []);
+
+  if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-red-50 p-6 text-center">
-        <div className="bg-white p-10 rounded-xl shadow-2xl max-w-md w-full">
-          <Ban className="w-20 h-20 text-red-500 mx-auto mb-6" />
-          <h1 className="text-3xl font-bold text-red-700 mb-4">
-            Access Denied!
-          </h1>
-          <p className="text-gray-700 text-lg">
-            You do not have permission to view this page. Please ensure you are
-            logged in as an Event Owner.
-          </p>
-          <Link
-            href="/login"
-            className="mt-6 inline-flex items-center bg-blue-600 text-white py-2 px-5 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-md"
-          >
-            Go to Login
-          </Link>
-        </div>
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <LoadingSpinner />
       </div>
     );
   }
 
-  const events = await prisma.event.findMany({
-    where: { ownerId: session.user.id },
-    orderBy: { date: "asc" },
-  });
+  if (events.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100 p-6">
+        <EmptyState description="No events recorded." />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 p-4 sm:p-6 lg:p-8 flex flex-col items-center">
